@@ -1,21 +1,22 @@
 import { Injectable } from '@nestjs/common';
-import { UsersRepository } from 'libs/database/repositories/users.repositories';
+import { UserRepository } from 'libs/database/repositories/user.repository';
 import * as md5 from 'md5';
 import { JwtService } from '@nestjs/jwt';
 import { User } from 'libs/database/models/user.model';
 import { JwtInfo } from './dto/jwt.dto';
+import { UserType } from 'libs/utils/utils';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly usersRepository: UsersRepository,
+    private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
   ) {}
 
   async validateUser(username: string, password: string) {
-    const user = await this.usersRepository.findOneByUsernameAndType(
+    const user = await this.userRepository.findOneByUsernameAndType(
       username,
-      'ADMIN',
+      UserType.ADMIN,
     );
 
     if (user && user.password === md5(password)) {
@@ -34,7 +35,7 @@ export class AuthService {
       Math.random().toString(36).substring(2, 15);
 
     user.login_token = login_token;
-    await this.usersRepository.update(user);
+    await this.userRepository.update(user);
 
     const payload: JwtInfo = {
       id: user.id.toString(),
@@ -42,7 +43,7 @@ export class AuthService {
       email: user.email,
       ip: 0,
       login_token,
-      type: 'ADMIN',
+      type: UserType.ADMIN,
     };
 
     return {

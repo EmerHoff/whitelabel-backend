@@ -3,11 +3,12 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { jwtConstants } from '../constants';
 import { JwtInfo } from '../dto/jwt.dto';
-import { UsersRepository } from 'libs/database/repositories/users.repositories';
+import { UserRepository } from 'libs/database/repositories/user.repository';
+import { UserStatus } from 'libs/utils/utils';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(private readonly userRepository: UsersRepository) {
+  constructor(private readonly userRepository: UserRepository) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: jwtConstants.ignoreExpiration,
@@ -31,7 +32,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     if (payload.type !== user.type) throw new UnauthorizedException();
 
-    // TODO: Verificar se o usuário está ativo
+    if (user.status !== UserStatus.ACTIVE) throw new UnauthorizedException();
 
     // Configuração que indica se é permitido apenas uma sessão por usuário
     if (jwtConstants.onlyOneSession) {

@@ -2,12 +2,14 @@ import { Module } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UsersRepository } from 'libs/database/repositories/users.repositories';
+import { UserRepository } from 'libs/database/repositories/user.repository';
 import { User } from 'libs/database/models/user.model';
+import { EmailLog } from 'libs/database/models/email_log.model';
+import { EmailLogRepository } from 'libs/database/repositories/email_log.repository';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User])],
+  imports: [TypeOrmModule.forFeature([User, EmailLog])],
   controllers: [UsersController],
-  providers: [UsersService, UsersRepository],
+  providers: [UsersService, UserRepository, EmailLogRepository],
 })
 export class UsersModule {}
