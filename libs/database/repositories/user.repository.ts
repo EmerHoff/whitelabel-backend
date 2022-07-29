@@ -1,7 +1,7 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserStatus } from 'libs/utils/utils';
 import { Repository } from 'typeorm';
-import { IUserCreate } from '../interfaces/user.interface';
+import { IUserCreate, IUserFindAll } from '../interfaces/user.interface';
 import { User } from '../models/user.model';
 
 export class UserRepository {
@@ -32,10 +32,52 @@ export class UserRepository {
     });
   }
 
-  findAll() {
-    return this.userRepository.find({
-      where: { status: UserStatus.ACTIVE },
-    });
+  async findAll(userFindAll: IUserFindAll) {
+    const userBuilder = this.userRepository.createQueryBuilder('user');
+
+    if (userFindAll.username) {
+      userBuilder.andWhere('user.username ILIKE :username', {
+        username: `%${userFindAll.username}%`,
+      });
+    }
+
+    if (userFindAll.email) {
+      userBuilder.andWhere('user.email ILIKE :email', {
+        email: `%${userFindAll.email}%`,
+      });
+    }
+
+    if (userFindAll.complete_name) {
+      userBuilder.andWhere(
+        `CONCAT(user.name, ' ', user.last_name) ILIKE :complete_name`,
+        {
+          complete_name: `%${userFindAll.complete_name}%`,
+        },
+      );
+    }
+
+    if (userFindAll.telephone) {
+      userBuilder.andWhere('user.telephone ILIKE :telephone', {
+        telephone: `%${userFindAll.telephone}%`,
+      });
+    }
+
+    if (userFindAll.type) {
+      userBuilder.andWhere('user.type = :type', {
+        type: userFindAll.type,
+      });
+    }
+
+    if (userFindAll.status) {
+      userBuilder.andWhere('user.status = :status', {
+        status: userFindAll.status,
+      });
+    }
+
+    const count = await userBuilder.getCount();
+    const users = await userBuilder.getMany();
+
+    return { count, users };
   }
 
   async create(userInfo: IUserCreate) {

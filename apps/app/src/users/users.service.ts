@@ -11,6 +11,7 @@ import {
 } from 'libs/utils/utils';
 import * as md5 from 'md5';
 import { JwtInfo } from '../auth/dto/jwt.dto';
+import { ContactService } from '../contact/contact.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { RequestResetPasswordDto } from './dto/request-reset-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
@@ -21,6 +22,7 @@ export class UsersService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly emailLogRepository: EmailLogRepository,
+    private readonly contactService: ContactService,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -135,8 +137,12 @@ export class UsersService {
 
     const token = ('' + Math.random()).substring(2, 7);
 
-    //TODO: Enviar o email com o código
-    console.log('TOKEN SENHA: ' + token);
+    await this.contactService.sendEmail(
+      user,
+      'reset-password-template',
+      'Recuperação de Senha',
+      token,
+    );
 
     // Registrar log da nova solicitação de senha
     await this.emailLogRepository.create({

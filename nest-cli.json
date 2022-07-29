@@ -5,7 +5,12 @@
   "root": "apps/admin",
   "compilerOptions": {
     "webpack": false,
-    "tsConfigPath": "apps/admin/tsconfig.app.json"
+    "tsConfigPath": "apps/admin/tsconfig.app.json",
+    "assets": [
+      "**/*.html",
+      "**/*.json",
+      "**/*.csv"
+    ]
   },
   "projects": {
     "app": {
